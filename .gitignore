@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.vscode/
+
+# Virtual environments
+.venv/
+
+# Packaging
+dist/
+build/
+*.egg-info/
+
+# data
+data/
+
+# docs
+docs/
+
+# Tests
+tests/
+

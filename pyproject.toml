@@ -1,0 +1,47 @@
+[project]
+name = "RAG-Agent-v2"
+version = "0.1.0"
+description = "RAG - Agent"
+authors = [{ name = "Kyleidoscopist", email = "1053503073@qq.com" }]
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.mongo]
+uri = "mongodb://localhost:27017"
+db_name = "rag_agent_v2_database"
+
+
+[tool.chroma]
+persist_directory = "data/chroma_db"
+# 可选：如需远程 ChromaDB 服务，取消注释并填写
+# host = "localhost"
+# port = 8000
+# settings = "{}"  # 如有特殊设置，可填写 JSON 字符串
+
+
+[tool.rag]
+# 检索器配置
+retriever_type = ["chroma", "bm25"] # vector, sparse, hybrid
+# 上传配置
+file_storage_path = "data/stored_files"
+max_file_size_mb = 10
+# 解析配置
+markdown_storage_path = "data/markdown_files"
+chunk_path = "data/chunked_files"
+chunk_size = 300
+chunk_overlap = 50
+split_method = "hierarchical"                # recursive, hierarchical
+llm_provider = "deepseek"
+llm_model = "deepseek-chat"
+embedding_provider = "bailian"
+embedding_model = "text-embedding-ada-002"
+
+# 检索配置
+top_k = 5
+query_rewrite = true
+query_route = true
+rerank = true
+context_retrieve = true
+# retrievel_method = ["bm25", "chroma"] # bm25, chroma
