@@ -1,4 +1,5 @@
 """文档管理相关的 API 路由"""
+
 from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File
 
 from src.api.models import (
@@ -22,7 +23,7 @@ async def list_document_records():
             documents=[
                 FileRecordResponse(
                     id=str(record.id),
-                    title=record.title,
+                    source=record.source,
                     metadata=record.metadata,
                     created_at=record.created_at,
                 )
@@ -45,7 +46,7 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
 
         return FileRecordResponse(
             id=str(document_record.id),
-            title=file.filename if file.filename else "unknown_file",
+            source=document_record.source,
             created_at=(
                 document_record.created_at
                 if hasattr(document_record, "created_at")

@@ -3,13 +3,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from src.dialog import Session
 from src.document import DocumentRecord
-from src.rag import KnowledgeBase
+import src.document.odm.DocumentRecord as dr
+from src.rag import KnowledgeBase, CollectionRecord
 from src.prompt import load_all_prompts
 
 from config import mongo_cfg
@@ -29,13 +29,19 @@ async def lifespan(app: FastAPI):
     # 初始化 Beanie ODM
     await init_beanie(
         database=db,  # type: ignore
-        document_models=[Session, KnowledgeBase, DocumentRecord],
+        document_models=[Session, KnowledgeBase, DocumentRecord, CollectionRecord],
     )
 
     print(f"✅ Connected to MongoDB: {database_name}")
 
     # 加载提示模板
     load_all_prompts()
+
+    # 加载id-title映射
+    records = await DocumentRecord.find_all().to_list()
+    dr.id_title_mapping = {
+        str(record.id): record.title for record in records if record.title
+    }
 
     yield
 
@@ -81,3 +87,12 @@ async def root():
 async def health_check():
     """健康检查"""
     return {"status": "ok"}
+
+
+@app.on_event("startup")
+async def preload_mapping():
+    global id_title_mapping
+    records = await DocumentRecord.find_all().to_list()
+    id_title_mapping = {
+        str(record.id): record.title for record in records if record.title
+    }

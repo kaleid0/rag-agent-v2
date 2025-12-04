@@ -15,14 +15,14 @@ logger = getLogger(__name__)
 class ChromaRetriever:
     _instances = {}
 
-    @property
-    def name(self) -> str:
-        return self.__class__.__name__
+    # @property
+    # def name(self) -> str:
+    #     return self.__class__.__name__
 
-    def __new__(cls, documen_record_ids: list[str] | str, *args, **kwargs):
-        if isinstance(documen_record_ids, str):
-            documen_record_ids = [documen_record_ids]
-        key = frozenset(str(i) for i in documen_record_ids)
+    def __new__(cls, collection_record_ids: list[str] | str, *args, **kwargs):
+        if isinstance(collection_record_ids, str):
+            collection_record_ids = [collection_record_ids]
+        key = frozenset(str(i) for i in collection_record_ids)
         if key not in cls._instances:
             instance = super().__new__(cls)
             cls._instances[key] = instance
@@ -30,18 +30,18 @@ class ChromaRetriever:
 
     def __init__(
         self,
-        documen_record_ids: list[str] | str,
+        collection_record_ids: list[str] | str,
         language: dict[str, str],
         embedding_function: EmbeddingFunction = SyncEmbeddingFunction(),
     ):
         if getattr(self, "_initialized", False):
             return
-        if isinstance(documen_record_ids, str):
-            documen_record_ids = [documen_record_ids]
+        if isinstance(collection_record_ids, str):
+            collection_record_ids = [collection_record_ids]
         self._initialized = True
         self.embedding_function = embedding_function
 
-        collection_ids = [str(rid) for rid in documen_record_ids]
+        collection_ids = [str(rid) for rid in collection_record_ids]
         self.vector_stores: dict[str, Collection] = {}
         self.language: dict[str, str] = {}
         for cid in collection_ids:
@@ -54,10 +54,12 @@ class ChromaRetriever:
     def ingest(
         cls,
         documents: list[Document],
+        collection_record_id: str,
         embedding_function: EmbeddingFunction = SyncEmbeddingFunction(),
-        document_record_id: str | None = None,
         **_: dict,
     ):
+        if collection_record_id is None:
+            collection_record_id = "default_record"
 
         try:
             # Chroma 向量化
@@ -69,10 +71,9 @@ class ChromaRetriever:
                 page_contents, metadatas = zip(
                     *((b.page_content, b.metadata) for b in batch)
                 )
-                if document_record_id is None:
-                    document_record_id = "default_record"
+
                 vector_store = get_collection(
-                    document_record_id, embedding_function=embedding_function
+                    collection_record_id, embedding_function=embedding_function
                 )
                 vector_store.add(
                     ids=[b.id for b in batch],  # type: ignore
@@ -81,7 +82,7 @@ class ChromaRetriever:
                 )
 
         except Exception as e:
-            logger.error(f"文档向量化失败: {document_record_id}", exc_info=e)
+            logger.error(f"文档向量化失败: {collection_record_id}", exc_info=e)
             raise RuntimeError(f"文档切片或向量化失败: {id}") from e
 
     # TODO query 中英文 配对

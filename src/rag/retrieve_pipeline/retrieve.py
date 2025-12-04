@@ -1,12 +1,12 @@
-# from beanie import PydanticObjectId
-# from typing import Optional
 from langchain_core.documents import Document
+from beanie.operators import In
+
 
 from src.rag.knowledge_base import KnowledgeBase
 from src.document import DocumentRecord
-from src.rag.retriever import RetrieverProtocol, BM25Retriever, ChromaRetriever
+from src.rag.retriever import BM25Retriever, ChromaRetriever
+from src.rag.knowledge_base import CollectionRecord
 
-# from src.rag.utils import remove_duplicates
 from config import rag_cfg
 
 """
@@ -24,31 +24,6 @@ Document 结构：
 """
 
 
-# async def retrieve_document(record_id: str, query: str, top_k: int) -> list[Document]:
-#     record = await DocumentRecord.find_one(DocumentRecord.id == record_id)
-#     if not record:
-#         raise ValueError("Record not found")
-#     if record.status != "completed":
-#         raise ValueError("Record ingestion not completed")
-
-#     if rag_cfg.get("retrievel_method") is None:
-#         raise ValueError("retrievel_method is not configured")
-
-#     retriever: list[BaseRetriever] = []
-#     if "chroma" in rag_cfg["retrievel_method"]:
-#         retriever.append(ChromaRetriever(str(record_id)))
-#     if "bm25" in rag_cfg["retrievel_method"]:
-#         retriever.append(BM25Retriever(str(record_id), language="EN"))
-
-#     results = []
-#     for r in retriever:
-#         results.extend(r.retrieve(query, top_k // len(retriever)))
-
-#     # 去重
-#     unique_docs = remove_duplicates(results)
-#     return unique_docs
-
-
 async def retrieve_knowledge_base(
     knowledge_base_id: str,
     query: dict | str,
@@ -56,33 +31,34 @@ async def retrieve_knowledge_base(
     top_k: int = 10,
     query_route: dict[str, int] | None = None,
 ) -> list[Document] | None:
-    knowledge_base = await KnowledgeBase.find_one(KnowledgeBase.id == knowledge_base_id)
+    knowledge_base = await KnowledgeBase.get(knowledge_base_id)
     if not knowledge_base:
         raise ValueError("Knowledge base not found")
 
-    record_ids = [str(record_id) for record_id in knowledge_base.document_record_ids]
-    if not record_ids:
-        return None
-    languages = {}
-    for rid in record_ids:
-        record = await DocumentRecord.get(rid)
-        if record:
-            languages[rid] = record.language
+    collection_records = await CollectionRecord.find(
+        CollectionRecord.knowledge_base_id == knowledge_base_id
+    ).to_list()
+    if not collection_records:
+        return []
 
-    # retriever: list[RetrieverProtocol] = []
-    # if "chroma" in rag_cfg["retriever_type"]:
-    #     retriever.append(ChromaRetriever(record_ids, language=languages))
-    # if "bm25" in rag_cfg["retriever_type"]:
-    #     retriever.append(BM25Retriever(record_ids, language=languages))
+    collecyion_record_ids = [rec.document_record_id for rec in collection_records]
+    # docs = await DocumentRecord.find(DocumentRecord.id.in_(collecyion_record_ids)).to_list()
+    docs = await DocumentRecord.find(
+        In(DocumentRecord.id, collecyion_record_ids)
+    ).to_list()
+    languages = {str(doc.id): doc.language for doc in docs}
+
     if knowledge_base.retriever_type == "vector":
-        retriever = [ChromaRetriever(record_ids, language=languages)]
+        retriever = [ChromaRetriever(collecyion_record_ids, language=languages)]
     elif knowledge_base.retriever_type == "sparse":
-        retriever = [BM25Retriever(record_ids, language=languages)]
+        retriever = [BM25Retriever(collecyion_record_ids, language=languages)]
     elif knowledge_base.retriever_type == "hybrid":
         retriever = [
-            ChromaRetriever(record_ids, language=languages),
-            BM25Retriever(record_ids, language=languages),
+            ChromaRetriever(collecyion_record_ids, language=languages),
+            BM25Retriever(collecyion_record_ids, language=languages),
         ]
+    else:
+        raise ValueError("Invalid retriever type")
 
     results: list[Document] = []
     if query_route:

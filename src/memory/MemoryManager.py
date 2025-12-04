@@ -2,7 +2,8 @@ from typing import Protocol
 
 # from llm.Message import Messages
 from .Memory import ShortTermMemory, LongTermMemory, Memory
-from .llm_call import memory_merge, memory_summary
+
+# from .llm_call import memory_merge, memory_summary
 
 
 # TODO: 1. 重构 MemoryManager 类，持久化类为Memory

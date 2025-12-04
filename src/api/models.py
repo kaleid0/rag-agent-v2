@@ -65,9 +65,7 @@ class FileRecordResponse(BaseModel):
     """文件记录响应"""
 
     id: str
-    title: str
-    knowledge_base_id: Optional[str] = None
-    chunks_count: Optional[int] = None
+    source: str
     metadata: Optional[Dict[str, Any]] = None
     created_at: Optional[datetime] = None
 
@@ -117,8 +115,8 @@ class KnowledgeBaseResponse(BaseModel):
     id: str
     name: str
     description: str
-    record_ids: List[str] = Field(default_factory=list, description="文件记录ID列表")
-    record_titles: List[str] = Field(
+    document_ids: List[str] = Field(default_factory=list, description="文件记录ID列表")
+    document_titles: List[str] = Field(
         default_factory=list, description="文件记录标题列表"
     )
     created_at: Optional[datetime] = None

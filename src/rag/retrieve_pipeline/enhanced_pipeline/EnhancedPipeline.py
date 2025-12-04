@@ -7,7 +7,7 @@ from .rerank import rerank
 from src.prompt import llm_call
 
 from src.document import id_to_title, get_keywords
-from src.rag.knowledge_base import KnowledgeBase
+from src.rag.knowledge_base import KnowledgeBase, CollectionRecord
 from src.rag.retrieve_pipeline.retrieve import retrieve_knowledge_base
 from src.llm import get_llm
 from config import rag_cfg
@@ -44,9 +44,15 @@ class EnhancedPipeline:
 
     # TODO 设置检索数量
     async def retrieve_knowledge_base(self, query: str, knowledge_base_id: str) -> str:
-        knowledge_base = await KnowledgeBase.get(knowledge_base_id)
-        if not knowledge_base:
+        # knowledge_base = await KnowledgeBase.get(knowledge_base_id)
+        if not await KnowledgeBase.get(knowledge_base_id):
             raise ValueError("Knowledge base not found")
+        collection_records = await CollectionRecord.find(
+            CollectionRecord.knowledge_base_id == knowledge_base_id
+        ).to_list()
+        document_record_ids = [
+            record.document_record_id for record in collection_records
+        ]
 
         # 1. query rewrite, query route ===============================================================
         tasks_map = {}
@@ -63,13 +69,9 @@ class EnhancedPipeline:
             )
 
         if rag_cfg.get("query_route"):
-            titles = [
-                id_to_title(record_id)
-                for record_id in knowledge_base.document_record_ids
-            ]
+            titles = [id_to_title(_id) for _id in document_record_ids]
             tasks = [
-                asyncio.create_task(get_keywords(rid))
-                for rid in knowledge_base.document_record_ids
+                asyncio.create_task(get_keywords(_id)) for _id in document_record_ids
             ]
             keywords = await asyncio.gather(*tasks)
 
@@ -84,10 +86,7 @@ class EnhancedPipeline:
             )
 
             # XXX 如果title有重复会出问题
-            title_to_id = {
-                id_to_title(record_id): record_id
-                for record_id in knowledge_base.document_record_ids
-            }
+            title_to_id = {id_to_title(_id): _id for _id in document_record_ids}
 
         # 获取任务结果
         if tasks_map:

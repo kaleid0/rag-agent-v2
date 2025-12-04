@@ -14,14 +14,14 @@ logger = getLogger(__name__)
 class BM25Retriever:
     _instances = {}
 
-    @property
-    def name(self) -> str:
-        return self.__class__.__name__
+    # @property
+    # def name(self) -> str:
+    #     return self.__class__.__name__
 
-    def __new__(cls, documen_record_ids: list[str] | str, *args, **kwargs):
-        if isinstance(documen_record_ids, str):
-            documen_record_ids = [documen_record_ids]
-        key = frozenset(str(i) for i in documen_record_ids)
+    def __new__(cls, collection_record_ids: list[str] | str, *args, **kwargs):
+        if isinstance(collection_record_ids, str):
+            collection_record_ids = [collection_record_ids]
+        key = frozenset(str(i) for i in collection_record_ids)
         if key not in cls._instances:
             instance = super().__new__(cls)
             cls._instances[key] = instance
@@ -29,28 +29,28 @@ class BM25Retriever:
 
     def __init__(
         self,
-        documen_record_ids: list[str],
+        collection_record_ids: list[str],
         language: dict[str, str],
     ):
         if getattr(self, "_initialized", False):
             return
-        if isinstance(documen_record_ids, str):
-            documen_record_ids = [documen_record_ids]
+        if isinstance(collection_record_ids, str):
+            collection_record_ids = [collection_record_ids]
         self._initialized = True
 
         all_documents = []
         self.bm25_retrievers: dict[str, LangchainBM25Retriever] = {}
         self.language: dict[str, str] = {}
-        for rid in documen_record_ids:
+        for cid in collection_record_ids:
             with open(
-                os.path.join(rag_cfg["chunk_path"], str(rid) + ".pkl"),
+                os.path.join(rag_cfg["chunk_dir"], cid + ".pkl"),
                 "rb",
             ) as f:
                 documents = pickle.load(f)
-                self.bm25_retrievers[rid] = LangchainBM25Retriever.from_documents(
+                self.bm25_retrievers[cid] = LangchainBM25Retriever.from_documents(
                     documents
                 )
-                self.language[rid] = language.get(rid, "EN") if language else "EN"
+                self.language[cid] = language.get(cid, "EN") if language else "EN"
                 all_documents.extend(documents)
         self.all_retriever = LangchainBM25Retriever.from_documents(all_documents)
 
@@ -58,6 +58,7 @@ class BM25Retriever:
     def ingest(
         cls,
         documents: list[Document],
+        collection_record_id: str,
         **_: dict,
     ) -> None:
         """

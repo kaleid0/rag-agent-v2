@@ -1,42 +1,75 @@
-import logging
-from langchain_core.documents import Document
+import os
+import pickle
+from beanie.odm.operators.update.general import Set
+
+from src.document.odm.DocumentRecord import DocumentRecord
+from src.rag.retriever import ChromaRetriever, BM25Retriever
+from .text_splitter.get_chunks import get_chunks
+
+from config import rag_cfg
 
 
-from src.rag.retriever import RetrieverProtocol
+class IngestResult:
+    __slots__ = "num_chunks"
 
-# from src.rag.text_splitter.get_chunks import get_chunks
+    def __init__(
+        self,
+        num_chunks: int,
+    ):
+        self.num_chunks = num_chunks
 
-# from config import rag_cfg
 
+def ingest_file(
+    collection_record_id: str,
+    markdown_path: str,
+    chunk_save_path: str,
+    document_title: str = "",
+    chunk_size: int = rag_cfg["chunk_size"],
+    chunk_overlap: int = rag_cfg["chunk_overlap"],
+    split_method: str = rag_cfg["split_method"],
+    retriever_type: str | None = None,
+) -> IngestResult:
+    """异步封装的 ingest 函数。
 
-logger = logging.getLogger(__name__)
+    Args:
+        document_record_id (str): DocumentRecord 的 ID。
+        chunk_save_path (str): 分块保存路径。
+        chunk_size (int): 分块大小。
+        chunk_overlap (int): 分块重叠大小。
+        retriever_type (list[BaseRetriever]): 检索器类型列表。
+    """
+    if retriever_type is None:
+        retriever_type = rag_cfg["retriever_type"]
 
+    try:
+        # 1. chunking
+        with open(markdown_path, "r", encoding="utf-8") as f:
+            markdown_content = f.read()
 
-def ingest(
-    chunks: list[Document],
-    retriever_type: list[RetrieverProtocol],
-):
-    """分块，并将Markdown文件内容分块并添加到指定的检索器中。"""
+        chunks = get_chunks(
+            markdown_content,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            split_method=split_method,
+            file_title=document_title,
+            record_id=collection_record_id,
+        )
 
-    if len(retriever_type) == 0:
-        raise ValueError("至少需要指定一种检索器类型")
+        os.makedirs(os.path.dirname(chunk_save_path), exist_ok=True)
+        with open(chunk_save_path, "wb") as f:
+            pickle.dump(chunks, f)
 
-    # with open(markdown_path, "r", encoding="utf-8") as f:
-    #     markdown_content = f.read()
+        # 2. ingeset
+        if retriever_type == "vector":
+            r_type = [ChromaRetriever]
+        elif retriever_type == "sparse":
+            r_type = [BM25Retriever]
+        elif retriever_type == "hybrid":
+            r_type = [ChromaRetriever, BM25Retriever]
+        for retriever in r_type:
+            retriever.ingest(chunks, collection_record_id=collection_record_id)
 
-    # # 1. chunking
-    # chunks = get_chunks(
-    #     markdown_content,
-    #     chunk_save_path=chunk_save_path,
-    #     chunk_size=chunk_size,
-    #     chunk_overlap=chunk_overlap,
-    # )
-    # num_chunks = len(chunks)
+    except Exception as e:
+        raise e
 
-    # 2. ingest
-    for retriever in retriever_type:
-        try:
-            retriever.ingest(chunks)
-        except Exception as e:
-            logger.error(f"在向检索器 {retriever.name} 中添加文档时出错: {e}")
-            raise e
+    return IngestResult(num_chunks=len(chunks))

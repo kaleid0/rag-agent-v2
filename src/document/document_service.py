@@ -6,7 +6,9 @@ from pathlib import Path
 from beanie.odm.operators.update.general import Set
 from beanie.odm.operators.update.array import Pop
 
-from .odm.DocumentRecord import DocumentRecord, StatusEnum
+from src.rag import CollectionRecord
+
+from .odm.DocumentRecord import DocumentRecord
 from src.rag import KnowledgeBase
 from .parse import parse
 from config import rag_cfg
@@ -32,10 +34,9 @@ async def delete_document_record(document_record_id: str):
     if not document_record:
         raise ValueError("File record not found")
 
-    for kb_id in document_record.knowledge_base_ids:
-        kb = await KnowledgeBase.find_one(KnowledgeBase.id == kb_id)
-        if kb:
-            await kb.update(Pop({KnowledgeBase.document_record_ids: document_record_id}))  # type: ignore
+    await CollectionRecord.find(
+        CollectionRecord.document_record_id == document_record_id
+    ).delete()
 
     await document_record.delete()
 
@@ -48,7 +49,7 @@ async def upload_file(file: UploadFile = File(...)) -> DocumentRecord:
     ext = Path(filename).suffix
     new_filename = f"{file_id}{ext}"
 
-    save_path = Path(rag_cfg["file_storage_path"]) / new_filename
+    save_path = Path(rag_cfg["file_storage_dir"]) / new_filename
     save_path.parent.mkdir(parents=True, exist_ok=True)
 
     # 读取全部内容
@@ -64,9 +65,7 @@ async def upload_file(file: UploadFile = File(...)) -> DocumentRecord:
         DocumentRecord.file_hash == file_hash
     )
     if document_record:
-        raise HTTPException(
-            status_code=400, detail=f"File {document_record} already exists"
-        )
+        raise Exception("File already exists")
 
     # 保存文件
     save_path.write_bytes(content)
@@ -76,7 +75,6 @@ async def upload_file(file: UploadFile = File(...)) -> DocumentRecord:
         source=filename,
         storage_path=str(save_path),
         file_hash=file_hash,
-        status=StatusEnum.pending,
     )
     await document_record.insert()
 
@@ -88,9 +86,10 @@ async def parse_file(document_record_id: str):
     document_record = await DocumentRecord.get(document_record_id)
     if not document_record:
         raise ValueError("File record not found")
+
     # 解析
     try:
-        output_dir = Path(rag_cfg["markdown_storage_path"])
+        output_dir = Path(rag_cfg["markdown_storage_dir"])
         os.makedirs(output_dir, exist_ok=True)
         markdown_filename = Path(document_record.storage_path).with_suffix(".md").name
         output_path = output_dir / markdown_filename
@@ -103,11 +102,8 @@ async def parse_file(document_record_id: str):
         document_record.keywords = parse_result.keywords
         document_record.directory = parse_result.directory
         document_record.language = parse_result.language
-        document_record.status = StatusEnum.parse_completed
 
         await document_record.save_changes()
 
     except Exception as e:
-        document_record.status = StatusEnum.failed
-        await document_record.update(Set({DocumentRecord.status: StatusEnum.failed}))
         raise e

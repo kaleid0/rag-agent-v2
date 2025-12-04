@@ -1,6 +1,6 @@
 from .retriever import RetrieverProtocol, ChromaRetriever, BM25Retriever
-from .knowledge_base import KnowledgeBase, knowledge_base_service
-from .ingest import ingest_service
+from .knowledge_base import KnowledgeBase, CollectionRecord, knowledge_base_service
+from .ingest.ingest import ingest_file
 from .retrieve_pipeline import (
     RetrievePipelineProtocol,
     EnhancedPipeline,
@@ -12,8 +12,9 @@ __all__ = [
     "ChromaRetriever",
     "BM25Retriever",
     "KnowledgeBase",
+    "CollectionRecord",
     "knowledge_base_service",
-    "ingest_service",
+    "ingest_file",
     "RetrievePipelineProtocol",
     "EnhancedPipeline",
     "SimplePipeline",

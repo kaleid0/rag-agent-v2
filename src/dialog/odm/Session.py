@@ -1,7 +1,10 @@
-from src.memory import ShortTermMemory
-from ..DialogMessage import DialogMessage
-from ...database.mongo.BaseDocument import BaseDocument
-from ...llm.Message import Messages
+from pymongo import ASCENDING, DESCENDING
+
+# from src.memory import ShortTermMemory
+from src.dialog.DialogMessage import DialogMessage
+from src.database import BaseDocument
+
+# from ...llm.Message import Messages
 
 
 class Session(BaseDocument):
@@ -18,19 +21,18 @@ class Session(BaseDocument):
         indexes = [
             # 复合索引：(user_id 升序, created_at 降序)
             # 1 代表升序 (ASCENDING)，-1 代表降序 (DESCENDING)
-            [("user_id", 1), ("created_at", -1)],
+            [("user_id", ASCENDING), ("created_at", DESCENDING)],
             # user_id 上的单键索引
             "user_id",
         ]
         use_state_management = True
 
-    # TODO: 逻辑有问题，需要改进
     def get_history(
         self,
         limit: int | None = None,
         start_rev_index: int | None = None,
         end_rev_index: int | None = None,
-    ) -> Messages:
+    ) -> list[dict[str, str]]:
         msgs = self.messages
         length = len(msgs)
         if limit:
@@ -60,7 +62,7 @@ class Session(BaseDocument):
         # 执行切片操作
         return msgs[slice_start_index:slice_end_index]
 
-    def get_all_user_messages(self) -> Messages:
+    def get_all_user_messages(self) -> list[dict[str, str]]:
         return [
             msg.message for msg in self.dialog_messages if msg.message.role == "user"  # type: ignore
         ]

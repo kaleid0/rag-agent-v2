@@ -21,7 +21,7 @@ if "messages" not in st.session_state:
 if "user_id" not in st.session_state:
     st.session_state.user_id = "streamlit_user"
 if "current_page" not in st.session_state:
-    st.session_state.current_page = "chat"  # 默认页面: chat, kb_manage, session_manage
+    st.session_state.current_page = "chat"  # chat, kb_manage, session_manage
 
 
 def create_session(user_id: str) -> Optional[str]:
@@ -339,9 +339,6 @@ def render_chat_page():
 
 def render_knowledge_base_manage_page():
     """渲染知识库管理页面"""
-    document_list = (
-        requests.get(f"{API_BASE_URL}/api/v1/document").json().get("documents", [])
-    )
 
     st.title("📚 知识库管理")
 
@@ -349,12 +346,21 @@ def render_knowledge_base_manage_page():
     st.header("知识库列表")
     try:
         kb_response = requests.get(f"{API_BASE_URL}/api/v1/knowledge-bases").json()
+        document_list = (
+            requests.get(f"{API_BASE_URL}/api/v1/document").json().get("documents", [])
+        )
     except Exception as e:
         st.error(f"获取知识库列表失败: {e}")
         kb_list = []
 
     kb_list = kb_response.get("knowledge_base_list", [])
-    num_kbs = kb_response.get("total", [])
+    document_list = [
+        doc for doc in document_list if doc.get("metadata", {}).get("is_prased", False)
+    ]
+    id_to_title = {
+        doc["id"]: doc.get("metadata", {}).get("title", "无标题")
+        for doc in document_list
+    }
 
     if not kb_list:
         st.info("未找到知识库")
@@ -367,28 +373,27 @@ def render_knowledge_base_manage_page():
                 st.write(f"**描述:** {kb.get('description', '无')}")
 
                 st.markdown("**包含文档:**")
-                record_titles = kb.get("record_titles", [])
+                record_titles = kb.get("document_titles", [])
                 if record_titles:
                     for title in record_titles:
                         st.write(f"- {title}")
 
                 with st.form(key=f"form_{kb_id}"):
-                    selectable_docs = [
-                        doc["title"]
+                    selectable_doc_ids = [
+                        doc["id"]
                         for doc in document_list
-                        if doc["id"] not in kb.get("record_ids", [])
+                        if doc["id"] not in kb.get("document_ids", [])
                     ]
                     st.multiselect(
                         "添加文档",
-                        options=selectable_docs,
+                        options=selectable_doc_ids,
+                        format_func=lambda x: id_to_title.get(x, "无标题"),
                         key=f"doc_selector_{kb_id}",
                     )
                     submitted = st.form_submit_button("提交", use_container_width=True)
 
                 if submitted:
-                    selected_titles = st.session_state[f"doc_selector_{kb_id}"]
-                    title_to_id = {doc["title"]: doc["id"] for doc in document_list}
-                    selected_ids = [title_to_id[t] for t in selected_titles]
+                    selected_ids = st.session_state[f"doc_selector_{kb_id}"]
 
                     # 发送请求
                     resp = requests.post(
@@ -431,13 +436,15 @@ def render_knowledge_base_manage_page():
         with c3:
             new_kb_split_method = st.selectbox(
                 "分块方法",
-                options=["Hierarchical", "Recursive"],
+                options=["hierarchical", "recursive"],
+                format_func=lambda s: s.capitalize(),
                 index=0,
             )
         with c4:
             new_kb_retriever_type = st.selectbox(
                 "检索器类型",
-                options=["Hybrid", "Vector", "Sparse"],
+                options=["hybrid", "vector", "sparse"],
+                format_func=lambda s: s.capitalize(),
                 index=0,
             )
         create_kb_btn = st.form_submit_button("创建知识库", type="primary")
@@ -595,14 +602,17 @@ def render_document_manage_page():
     else:
         for doc in doc_list:
             doc_id = doc.get("id")
-            doc_title = doc.get("title", "无标题")
             metadata = doc.get("metadata", {})
+            doc_title = metadata.get("title") or doc.get("source", "未命名文档")
             doc_summary = metadata.get("abstract", "无摘要")
             doc_keywords = metadata.get("keywords", [])
 
             with st.expander(f"📄 {doc_title}", expanded=False):
-                st.write(f"**摘要:** {doc_summary}")
-                st.write(f"**关键词:** {doc_keywords}")
+                if metadata.get("title"):
+                    st.write(f"**摘要:** {doc_summary}")
+                    st.write(f"**关键词:** {doc_keywords}")
+                else:
+                    st.spinner("解析中")
 
                 if st.button("删除文档", key=f"del_doc_{doc_id}", type="secondary"):
                     try:

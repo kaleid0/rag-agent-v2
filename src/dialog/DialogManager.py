@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, AsyncGenerator, Optional, Callable
+from typing import Any, AsyncGenerator, Optional
 
 # from beanie import PydanticObjectId
 import asyncio
@@ -41,8 +41,8 @@ class DialogManager:
     async def set_llm_adapter(self, llm_adapter: BaseChatAdapter):
         self.llm_adapter = llm_adapter
 
-    async def set_retriever(self, retriever: Callable):
-        self.retriever = retriever
+    async def set_retrieve_pipeline(self, retrieve_pipeline: RetrievePipelineProtocol):
+        self.retrieve_pipeline = retrieve_pipeline
 
     async def _append_message(
         self,
@@ -98,8 +98,11 @@ class DialogManager:
         # last_user_msgs = [m for m in session.messages if m.get("role") == "user"]
         # query = last_user_msgs[-1].get("content") if last_user_msgs else ""
 
-        if self.retriever:
-            retrieved = self.retriever(message_content, knowledge_base_id)
+        if knowledge_base_id and self.retrieve_pipeline:
+            retrieved = await self.retrieve_pipeline.retrieve_knowledge_base(
+                query=message_content,
+                knowledge_base_id=knowledge_base_id,
+            )
 
             # prompt_template = get_prompt("RAG_answer")
             # prompt = prompt_template.format(

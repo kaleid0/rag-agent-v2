@@ -20,6 +20,7 @@ _chroma_client_singleton: Optional[ClientAPI] = None
 _chroma_client_lock: Lock = Lock()
 _chroma_client_config: Optional[dict] = None
 
+
 # TODO 配置项
 def _resolve_chroma_config(explicit_config: Optional[dict]) -> dict:
     """
@@ -134,7 +135,7 @@ def set_chroma_client_factory(factory: Callable[[], ClientAPI]) -> None:
 
 
 def get_collection(
-    name: str, embedding_function: EmbeddingFunction, **kwargs
+    name: str, embedding_function: EmbeddingFunction | None = None, **kwargs
 ) -> Collection:
     """
     快捷获取集合对象。
@@ -155,12 +156,17 @@ def get_collection(
 
 
 def create_collection(
-    name: str, embedding_function: EmbeddingFunction, **kwargs
+    name: str, embedding_function: EmbeddingFunction | None, **kwargs
 ) -> Collection:
     client = get_chroma_client()
     return client.create_collection(
         name=name, embedding_function=embedding_function, **kwargs
     )
+
+
+def delete_collection(name: str) -> None:
+    client = get_chroma_client()
+    client.delete_collection(name)
 
     """
     from src.database.chroma.chroma import get_collection

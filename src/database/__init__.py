@@ -1,4 +1,4 @@
-from .chroma.chroma import get_chroma_client, get_collection
+from .chroma.chroma import get_chroma_client, get_collection, delete_collection
 from .mongo.mongo import connect_db, disconnect_db
 from .mongo.BaseDocument import BaseDocument
 
@@ -7,5 +7,6 @@ __all__ = [
     "disconnect_db",
     "get_chroma_client",
     "get_collection",
+    "delete_collection",
     "BaseDocument",
 ]

@@ -23,16 +23,16 @@ persist_directory = "data/chroma_db"
 
 [tool.rag]
 # 检索器配置
-retriever_type = ["chroma", "bm25"] # vector, sparse, hybrid
+retriever_type = "hybrid" # vector, sparse, hybrid
 # 上传配置
-file_storage_path = "data/stored_files"
-max_file_size_mb = 10
+file_storage_dir = "data/stored_files"
+max_file_size_mb = 10                   # MB
 # 解析配置
-markdown_storage_path = "data/markdown_files"
-chunk_path = "data/chunked_files"
+markdown_storage_dir = "data/markdown_files"
+chunk_dir = "data/chunked_files"
 chunk_size = 300
 chunk_overlap = 50
-split_method = "hierarchical"                # recursive, hierarchical
+split_method = "hierarchical"                 # recursive, hierarchical
 llm_provider = "deepseek"
 llm_model = "deepseek-chat"
 embedding_provider = "bailian"
