@@ -17,3 +17,16 @@ register_prompt(
 )
 
 
+register_prompt(
+    PromptConfig(
+        name="title_session",
+        input_builder=lambda args: get_prompt("title_session", "dialog").format(
+            text=str(args["text"]),
+        ),
+        output_parser=lambda response: response.strip().strip('"'),
+        llm_args={
+            "temperature": 0,
+            "max_tokens": 32,
+        },
+    )
+)

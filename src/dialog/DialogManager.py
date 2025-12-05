@@ -8,16 +8,11 @@ from datetime import datetime, timezone
 from beanie.odm.operators.update.array import Push
 
 from src.llm.adapter.BaseChatAdapter import BaseChatAdapter
-from src.rag import RetrievePipelineProtocol, EnhancedPipeline
+from src.rag import RetrievePipelineProtocol
 from .DialogMessage import DialogMessage, RoleEnum
 from .odm.Session import Session
 
-# from src.tools.get_prompt import get_prompt
-
-# from dialog.memory.memory_summary import memory_summary
-# from memory.memory_merge import memory_merge
-# from memory import memory_summary, memory_merge
-from src.prompt import llm_call, llm_chat_stream
+from src.prompt import llm_chat_stream
 
 
 class DialogManager:
@@ -61,13 +56,13 @@ class DialogManager:
         await session.update(Push({Session.dialog_messages: msg}))  # type: ignore
         return msg
 
-    async def start_session(self, user_id: str, metadata: Optional[dict] = None) -> str:
-        """创建并保存新会话，返回会话 ID"""
-        s = Session(user_id=user_id, metadata=metadata or {})
-        await s.insert()
-        if s.id is None:
-            raise RuntimeError("Failed to create session - ID is None")
-        return str(s.id)
+    # async def start_session(self, user_id: str, metadata: Optional[dict] = None) -> str:
+    #     """创建并保存新会话，返回会话 ID"""
+    #     s = Session(user_id=user_id, metadata=metadata or {})
+    #     await s.insert()
+    #     if s.id is None:
+    #         raise RuntimeError("Failed to create session - ID is None")
+    #     return str(s.id)
 
     # TODO stream模式已更新，非stream模式待更新
     async def generate_response(
@@ -144,17 +139,15 @@ class DialogManager:
         message_metadata = message_metadata or {}
 
         # 简单检索调用
-        # TODO prompt内容不能出现在content中，放在metadata里更合适
         retrieved = []
         if knowledge_base_id and self.retrieve_pipeline:
-            # retrieved = await self.retriever(message_content, knowledge_base_id)
             retrieved = await self.retrieve_pipeline.retrieve_knowledge_base(
                 query=message_content,
                 knowledge_base_id=knowledge_base_id,
             )
             message_metadata["retrieved_context"] = retrieved
 
-            stream_source = llm_chat_stream(
+            stream_source = await llm_chat_stream(
                 "RAG_answer",
                 self.llm_adapter,
                 session.messages,
@@ -178,18 +171,14 @@ class DialogManager:
                 metadata=message_metadata,
             )
             stream_source = self.llm_adapter.async_stream_chat(session.messages)
-        # messages = session.messages[:-1] + [{"role": "user", "content": prompt}]
-
-        # 使用异步流式接口逐块接收文本并拼接
-
-        # stream_source = self.llm_adapter.async_stream_chat(session.messages)
 
         if asyncio.iscoroutine(stream_source):
             stream_source = await stream_source
 
+        # 使用异步流式接口逐块接收文本并拼接
         async def token_stream():
             response_text = ""
-            async for chunk in stream_source:  # type: ignore
+            async for chunk in stream_source:
                 if chunk:
                     response_text += chunk
                     # print(chunk)
@@ -201,12 +190,15 @@ class DialogManager:
                 content=response_text,
                 metadata={"generated_at": datetime.now(timezone.utc).isoformat()},
             )
-            # print("assistant message:", assistant_msg)
             await session.save()
 
         return token_stream()
 
-    async def exit_session(self, session: Session) -> None:
-        """结束会话，执行任何必要的清理操作"""
-        # TODO
-        raise NotImplementedError("Session exit logic not implemented yet")
+    # async def exit_session(self, session: Session) -> None:
+    #     """结束会话，执行任何必要的清理操作"""
+    #     # TODO
+    #     # raise NotImplementedError("Session exit logic not implemented yet")
+        
+
+
+# async def 

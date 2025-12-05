@@ -1,3 +1,4 @@
+import asyncio
 from langchain_core.documents import Document
 
 from src.prompt import llm_call
@@ -21,30 +22,35 @@ async def rerank(
     """
     if isinstance(query, dict):
         query = query.get("EN", "")
-    all_grades = []
+
     batch = 5
+    task = []
     for i in range(0, len(documents), batch):
         batch_texts = documents[i : i + batch]
-        # grades = await grade_texts(
-        #     query,  # type: ignore
-        #     [doc.page_content for doc in batch_texts],
-        # )
-        grades = await llm_call(
-            prompt_name="grade_texts",
-            llm=get_llm(
-                llm_provider=rag_cfg["llm_provider"], model=rag_cfg["llm_model"]
-            ),
-            args={
-                "query": query,
-                "test1": batch_texts[0].page_content,
-                "test2": batch_texts[1].page_content,
-                "test3": batch_texts[2].page_content,
-                "test4": batch_texts[3].page_content,
-                "test5": batch_texts[4].page_content,
-            },
+        task.append(
+            llm_call(
+                prompt_name="grade_texts",
+                llm=get_llm(
+                    llm_provider=rag_cfg["llm_provider"], model=rag_cfg["llm_model"]
+                ),
+                args={
+                    "query": query,
+                    "text1": batch_texts[0].page_content,
+                    "text2": batch_texts[1].page_content,
+                    "text3": batch_texts[2].page_content,
+                    "text4": batch_texts[3].page_content,
+                    "text5": batch_texts[4].page_content,
+                },
+            )
         )
-        grades = list(map(int, grades.values()))
-        all_grades.extend(grades)
+
+    result = await asyncio.gather(*task)
+    all_grades = []
+    for grades in result:
+        all_grades.extend(list(map(int, grades.values())))
+
+    # grades = list(map(int, grades.values()))
+    # all_grades.extend(grades)
 
     text_grade_pairs = list(zip(documents, all_grades))
     # 按分数降序排序

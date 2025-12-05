@@ -1,5 +1,5 @@
 import asyncio
-from langchain_core.documents import Document
+import logging
 
 from src.rag.utils import organize_context
 from .context_retrieve import context_retrieve
@@ -11,6 +11,8 @@ from src.rag.knowledge_base import KnowledgeBase, CollectionRecord
 from src.rag.retrieve_pipeline.retrieve import retrieve_knowledge_base
 from src.llm import get_llm
 from config import rag_cfg
+
+logger = logging.getLogger(__name__)
 
 """
 Document 结构：
@@ -50,9 +52,6 @@ class EnhancedPipeline:
         collection_records = await CollectionRecord.find(
             CollectionRecord.knowledge_base_id == knowledge_base_id
         ).to_list()
-        document_record_ids = [
-            record.document_record_id for record in collection_records
-        ]
 
         # 1. query rewrite, query route ===============================================================
         tasks_map = {}
@@ -69,9 +68,10 @@ class EnhancedPipeline:
             )
 
         if rag_cfg.get("query_route"):
-            titles = [id_to_title(_id) for _id in document_record_ids]
+            titles = [id_to_title(col.document_record_id) for col in collection_records]
             tasks = [
-                asyncio.create_task(get_keywords(_id)) for _id in document_record_ids
+                asyncio.create_task(get_keywords(col.document_record_id))
+                for col in collection_records
             ]
             keywords = await asyncio.gather(*tasks)
 
@@ -86,7 +86,7 @@ class EnhancedPipeline:
             )
 
             # XXX 如果title有重复会出问题
-            title_to_id = {id_to_title(_id): _id for _id in document_record_ids}
+            # title_to_id = {id_to_title(_id): _id for _id in document_record_ids}
 
         # 获取任务结果
         if tasks_map:
@@ -101,6 +101,8 @@ class EnhancedPipeline:
                 if "routed_query" in tasks_map
                 else None
             )
+            logger.info(f"EnhancedPipeline: rewrited_query={rewrited_query}")
+            logger.info(f"EnhancedPipeline: routed_query={routed_query}")
         # 如果没有任务，直接返回默认值
         else:
             rewrited_query = routed_query = None
@@ -108,14 +110,9 @@ class EnhancedPipeline:
         # 2. retrieve knowledge base ===============================================================================
         if rag_cfg.get("query_route"):
             routed_query_id: dict[str, int] = {}
-            for title, count in routed_query.items():  # type: ignore
-                record_id = title_to_id.get(title, None)
-                if record_id:
-                    routed_query_id[record_id] = count
-                else:
-                    raise ValueError(
-                        f"Record title '{title}' not found in id_title_mapping"
-                    )
+            for i, (title, count) in enumerate(routed_query.items()):  # type: ignore
+                routed_query_id[str(collection_records[i].id)] = count
+
             result = await retrieve_knowledge_base(
                 knowledge_base_id=knowledge_base_id,
                 query=rewrited_query if rewrited_query else query,
@@ -127,6 +124,10 @@ class EnhancedPipeline:
                 query=rewrited_query if rewrited_query else query,
                 top_k=10,  # TODO config
             )
+        logger.info(f"EnhancedPipeline: retrieved documents:")
+        for doc in result or []:
+            logger.info(f"  - {doc.metadata['document_title']}")
+            logger.info(f"    {doc.page_content[:100]}...")
 
         # 3. rerank =============================================================================================
         if rag_cfg.get("rerank"):
@@ -138,6 +139,10 @@ class EnhancedPipeline:
                 )
         else:
             documents = result
+        logger.info(f"EnhancedPipeline: reranked documents:")
+        for doc in documents or []:
+            logger.info(f"  - {doc.metadata['document_title']}")
+            logger.info(f"    {doc.page_content[:30]}...")
 
         # 4. context retrieve ====================================================================================
         if rag_cfg.get("context_retrieve"):
@@ -152,5 +157,11 @@ class EnhancedPipeline:
             )
 
         organized_context = organize_context(context_documents)
+
+        logger.info("EnhancedPipeline: organized context:")
+        for title, contents in organized_context.items():  # type: ignore
+            logger.info(f"  - {title}:")
+            for content in contents:
+                logger.info(f"    {content[:30]}...")
 
         return organized_context

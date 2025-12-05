@@ -41,21 +41,28 @@ async def retrieve_knowledge_base(
     if not collection_records:
         return []
 
-    collecyion_record_ids = [rec.document_record_id for rec in collection_records]
-    # docs = await DocumentRecord.find(DocumentRecord.id.in_(collecyion_record_ids)).to_list()
+    document_record_ids = [rec.document_record_id for rec in collection_records]
+    # docs = await DocumentRecord.find(DocumentRecord.id.in_(collection_record_ids)).to_list()
     docs = await DocumentRecord.find(
-        In(DocumentRecord.id, collecyion_record_ids)
+        In(DocumentRecord.id, document_record_ids)
     ).to_list()
-    languages = {str(doc.id): doc.language for doc in docs}
+    doc_id_languages = {str(doc.id): doc.language for doc in docs}
+    col_ids = []
+    languages = {}
+    for col_record in collection_records:
+        col_ids.append(str(col_record.id))
+        languages[str(col_record.id)] = doc_id_languages.get(
+            str(col_record.document_record_id), "EN"
+        )
 
     if knowledge_base.retriever_type == "vector":
-        retriever = [ChromaRetriever(collecyion_record_ids, language=languages)]
+        retriever = [ChromaRetriever(col_ids, language=languages)]
     elif knowledge_base.retriever_type == "sparse":
-        retriever = [BM25Retriever(collecyion_record_ids, language=languages)]
+        retriever = [BM25Retriever(col_ids, language=languages)]
     elif knowledge_base.retriever_type == "hybrid":
         retriever = [
-            ChromaRetriever(collecyion_record_ids, language=languages),
-            BM25Retriever(collecyion_record_ids, language=languages),
+            ChromaRetriever(col_ids, language=languages),
+            BM25Retriever(col_ids, language=languages),
         ]
     else:
         raise ValueError("Invalid retriever type")

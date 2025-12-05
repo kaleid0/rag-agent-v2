@@ -1,13 +1,15 @@
+import logging
+
 from src.rag.utils import organize_context
 from src.rag.retrieve_pipeline.retrieve import retrieve_knowledge_base
 from src.rag.knowledge_base import KnowledgeBase
 from config import rag_cfg
 
 
-class SimplePipeline:
+logger = logging.getLogger(__name__)
 
-    # def __init__(self, retriever_type: str) -> None:
-    #     self.retriever_type = retriever_type
+
+class SimplePipeline:
 
     async def retrieve_document(self, query: str, document_record_id: str) -> str:
         """Retrieve documents based on the query."""
@@ -32,5 +34,10 @@ class SimplePipeline:
         )
 
         organized_context = organize_context(context_documents)
+        logger.info("SimplePipeline: organized context:")
+        for title, contents in organized_context.items():  # type: ignore
+            logger.info(f"  - {title}:")
+            for content in contents:
+                logger.info(f"    {content[:30]}...")
 
         return organized_context

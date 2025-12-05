@@ -73,3 +73,8 @@ def ingest_file(
         raise e
 
     return IngestResult(num_chunks=len(chunks))
+
+
+def ingest_memory():
+    """将 Memory 对象中的内容分块并存储到 RAG 系统中。"""
+    pass

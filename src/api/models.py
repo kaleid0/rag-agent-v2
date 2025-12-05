@@ -53,11 +53,7 @@ class ChatResponse(BaseModel):
 class SessionHistoryResponse(BaseModel):
     """会话历史响应"""
 
-    session_id: str
-    user_id: str
     messages: List[Dict[str, Any]]
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
 
 
 # ===== 文档管理相关模型 =====
