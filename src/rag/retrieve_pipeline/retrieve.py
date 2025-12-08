@@ -1,6 +1,6 @@
 from langchain_core.documents import Document
 from beanie.operators import In
-
+from beanie import PydanticObjectId
 
 from src.rag.knowledge_base import KnowledgeBase
 from src.document import DocumentRecord
@@ -41,7 +41,7 @@ async def retrieve_knowledge_base(
     if not collection_records:
         return []
 
-    document_record_ids = [rec.document_record_id for rec in collection_records]
+    document_record_ids = [PydanticObjectId(rec.document_record_id) for rec in collection_records]
     docs = await DocumentRecord.find(
         In(DocumentRecord.id, document_record_ids)
     ).to_list()

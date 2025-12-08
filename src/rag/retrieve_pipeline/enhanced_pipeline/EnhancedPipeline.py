@@ -140,10 +140,10 @@ class EnhancedPipeline:
                 )
         else:
             documents = result
-        logger.info(f"EnhancedPipeline: reranked documents:")
-        for doc in documents or []:
-            logger.info(f"  - {doc.metadata['document_title']}")
-            logger.info(f"    {doc.page_content[:30]}...")
+        # logger.info(f"EnhancedPipeline: reranked documents:")
+        # for doc in documents or []:
+        #     logger.info(f"  - {doc.metadata['document_title']}")
+        #     logger.info(f"    {doc.page_content[:30]}...")
 
         # 4. context retrieve ====================================================================================
         if rag_cfg.get("context_retrieve"):
@@ -160,10 +160,7 @@ class EnhancedPipeline:
         organized_context = organize_context(context_documents)
 
         logger.info("EnhancedPipeline: organized context:")
-        for title, contents in organized_context.items():  # type: ignore
-            logger.info(f"  - {title}:")
-            for content in contents:
-                logger.info(f"    {content[:30]}...")
+        logger.info(organized_context[:100] + "...")
 
         return organized_context
 

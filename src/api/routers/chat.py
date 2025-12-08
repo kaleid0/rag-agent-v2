@@ -86,7 +86,6 @@ async def exit_session(
 ):
     """退出会话：如果会话没有任何对话消息，则删除之，否则保留并返回信息。"""
     try:
-        # msg = await session_service.exit_session(session_id)
         background_task.add_task(session_service.exit_session, session_id)
         return SuccessResponse(message="Session exit processing started.")
 
