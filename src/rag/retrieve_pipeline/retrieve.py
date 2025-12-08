@@ -7,7 +7,7 @@ from src.document import DocumentRecord
 from src.rag.retriever import BM25Retriever, ChromaRetriever
 from src.rag.knowledge_base import CollectionRecord
 
-from config import rag_cfg
+from config import rag_cfg, memory_cfg
 
 """
 Document 结构：
@@ -42,7 +42,6 @@ async def retrieve_knowledge_base(
         return []
 
     document_record_ids = [rec.document_record_id for rec in collection_records]
-    # docs = await DocumentRecord.find(DocumentRecord.id.in_(collection_record_ids)).to_list()
     docs = await DocumentRecord.find(
         In(DocumentRecord.id, document_record_ids)
     ).to_list()
@@ -74,5 +73,26 @@ async def retrieve_knowledge_base(
     else:
         for r in retriever:
             results.extend(r.retrieve(query, top_k=top_k // len(retriever)))
+
+    return results
+
+# TODO 设置相似度阈值
+# TODO context 组装
+async def retrieve_memory(
+    user_id: str,
+    query: dict | str,
+    top_k: int = 10,
+) -> list[Document] | None:
+
+    if memory_cfg["retriever_type"] == "vector":
+        retriever = [ChromaRetriever([user_id])]
+    elif memory_cfg["retriever_type"] == "sparse":
+        retriever = [BM25Retriever([user_id])]
+    elif memory_cfg["retriever_type"] == "hybrid":
+        retriever = [ChromaRetriever([user_id]), BM25Retriever([user_id])]
+
+    results: list[Document] = []
+    for r in retriever:
+        results.extend(r.retrieve(query, top_k=top_k // len(retriever)))
 
     return results

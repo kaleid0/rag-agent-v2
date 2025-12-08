@@ -7,3 +7,5 @@ mongo_cfg = cfg["tool"]["mongo"]
 chroma_cfg = cfg["tool"]["chroma"]
 
 rag_cfg = cfg["tool"]["rag"]
+
+memory_cfg = cfg["tool"]["memory"]

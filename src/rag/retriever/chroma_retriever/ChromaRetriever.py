@@ -31,7 +31,7 @@ class ChromaRetriever:
     def __init__(
         self,
         collection_record_ids: list[str] | str,
-        language: dict[str, str],
+        language: dict[str, str] | None = None,
         embedding_function: EmbeddingFunction = SyncEmbeddingFunction(),
     ):
         if getattr(self, "_initialized", False):
@@ -113,7 +113,7 @@ class ChromaRetriever:
                     ],
                     n_results=top_k,
                 )
-                results.extend(res)
+                results.append(res)
 
             topk_results = get_topk_query_result(results, top_k)
             documents = [doc for _, doc in topk_results]
@@ -148,14 +148,15 @@ def get_topk_query_result(results: list[QueryResult], k: int):
     for result in results:
         distances = result.get("distances")
         documents = result.get("documents")
+        metadatas = result.get("metadatas")
 
-        if distances is None or documents is None:
+        if distances is None or documents is None or metadatas is None:
             continue
 
         # 遍历每个 query 的结果
-        for dist_list, doc_list in zip(distances, documents):
-            for dist, doc in zip(dist_list, doc_list):
-                merged.append((dist, doc))  # type: ignore
+        for dist_list, doc_list, meta_list in zip(distances, documents, metadatas):
+            for dist, doc, meta in zip(dist_list, doc_list, meta_list):
+                merged.append((dist, Document(page_content=doc, metadata=meta)))  # type: ignore
 
     # 按距离升序排序
     merged.sort(key=lambda x: x[0])

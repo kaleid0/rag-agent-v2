@@ -39,6 +39,22 @@ def md_to_xml(markdown_text: str) -> str:
     return "\n".join(xml_parts)
 
 
+def remove_html_comments(text: str) -> str:
+    """
+    删除所有 HTML 注释（包括整行注释、行内注释、多段注释）
+    不会删除非注释的其他内容。
+    """
+
+    # 删除所有注释 <!-- ... -->
+    # DOTALL 让 . 匹配换行，确保跨行注释也能删除
+    cleaned = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+
+    # 清理注释删掉后产生的多余空格
+    cleaned = "\n".join(line.rstrip() for line in cleaned.splitlines())
+
+    return cleaned
+
+
 def _preprocess(prompt: str) -> str:
     """删除 markdown 中的一级标题"""
     lines = prompt.splitlines()
@@ -61,4 +77,5 @@ def get_prompt(prompt_name: str, module_name: str) -> str:
     """
     markdown_text = load_prompt(prompt_name, module_name)
     markdown_text = _preprocess(markdown_text)
+    markdown_text = remove_html_comments(markdown_text)
     return md_to_xml(markdown_text)

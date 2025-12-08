@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import os
 from threading import Lock
-from typing import Optional, Callable, Union
+from typing import Optional, Callable
 
 import chromadb
 from chromadb import (
@@ -168,8 +167,14 @@ def delete_collection(name: str) -> None:
     client = get_chroma_client()
     client.delete_collection(name)
 
+
+def delete_content_from_collection(name: str, metadata: dict) -> None:
+    client = get_chroma_client()
+    collection = client.get_collection(name)
+    collection.delete(where=metadata)
+
     """
-    from src.database.chroma.chroma import get_collection
+from src.database.chroma.chroma import get_collection
 from chromadb.utils import embedding_functions
 
 # 假设你有一个 embedding function（这里用 ChromaDB 内置的 OpenAIEmbeddingFunction 举例）

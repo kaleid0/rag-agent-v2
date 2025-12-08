@@ -153,8 +153,8 @@ def render_chat_page():
     # 侧边栏 - 会话相关控制
     with st.sidebar:
 
-        # 会话控制
-        st.subheader("会话控制")
+        # 知识库控制
+        st.subheader("知识库控制")
 
         # 获取知识库列表
         try:
@@ -594,7 +594,7 @@ def render_document_manage_page():
         st.error(f"获取文档列表失败: {e}")
         doc_list = []
 
-    st.header(f"文档列表 ({len(doc_list)})")
+    st.header(f"文档列表")
 
     # 文档列表
     if not doc_list:

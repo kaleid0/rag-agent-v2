@@ -26,13 +26,13 @@ persist_directory = "data/chroma_db"
 retriever_type = "hybrid" # vector, sparse, hybrid
 # 上传配置
 file_storage_dir = "data/stored_files"
-max_file_size_mb = 10                   # MB
+max_file_size_mb = 10                  # MB
 # 解析配置
 markdown_storage_dir = "data/markdown_files"
 chunk_dir = "data/chunked_files"
 chunk_size = 300
 chunk_overlap = 50
-split_method = "hierarchical"                 # recursive, hierarchical
+split_method = "hierarchical"                # character, recursive, hierarchical
 llm_provider = "deepseek"
 llm_model = "deepseek-chat"
 embedding_provider = "bailian"
@@ -45,3 +45,13 @@ query_route = true
 rerank = true
 context_retrieve = true
 # retrievel_method = ["bm25", "chroma"] # bm25, chroma
+
+
+[tool.memory]
+# rag 配置
+split_method = "character"        # character, recursive, hierarchical
+max_chunk_size = 300
+retriever_type = "vector"
+top_k = 5
+min_similarity_score = 0.75
+chunk_dir = "data/chunked_memory"

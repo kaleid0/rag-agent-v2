@@ -31,6 +31,7 @@ Document 结构：
 
 class EnhancedPipeline:
 
+    # TODO llm_adapter，检索配置信息，把rerank等方法也加进来
     # def __init__(self, retriever_type: str) -> None:
     #     self.retriever_type = retriever_type
 
@@ -165,3 +166,6 @@ class EnhancedPipeline:
                 logger.info(f"    {content[:30]}...")
 
         return organized_context
+
+    async def retrieve_memory(self, query: str, user_id: str) -> str:
+        raise NotImplementedError

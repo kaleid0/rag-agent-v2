@@ -23,6 +23,7 @@ class DialogMessage(BaseModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     # 存储为字符串 UUID，并设置默认工厂
+    # TODO 删除这条
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
 
     @property

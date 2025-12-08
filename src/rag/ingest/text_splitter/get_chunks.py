@@ -2,17 +2,19 @@ from langchain_core.documents import Document
 
 
 from .MarkdownHeaderTextSplitter import MarkdownHeaderTextSplitter
-from .RecursiveCharacterTextSplitter import RecursiveCharacterTextSplitter
+from .MessagesTextSplitter import MessagesTextSplitter
+from .LangchainTextSplitter import (
+    CharacterTextSplitter,
+    RecursiveTextSplitter,
+)
 
 
 def get_chunks(
     text: str,
-    # chunk_save_path: str,
     chunk_size: int,
     chunk_overlap: int,
     split_method: str = "hierarchical",  # 'hierarchical' or 'recursive'
-    file_title: str | None = None,
-    record_id: str | None = None,
+    metadata: dict | None = None,
 ) -> list[Document]:
 
     # 切片处理
@@ -22,26 +24,38 @@ def get_chunks(
         chunk_overlap=chunk_overlap,
         split_method=split_method,
     )
-    chunks = _add_metadata(chunks, file_title, record_id)
+    chunks = _build_documents(chunks, metadata=metadata)
 
     return chunks
 
 
 def _chunking(
-    text: str, chunk_size: int, chunk_overlap: int = 0, **kwargs
+    text: str,
+    chunk_size: int,
+    chunk_overlap: int = 0,
+    split_method: str = "character",
+    **kwargs,
 ) -> list[dict[str, str]]:
     """
     文档分块处理, 保存片段
 
-    output: list[str] or list[dict] [{'Header 1': 'Introduction', 'content': '...'}, ...]
+    output: list[dict] [{'Header 1': 'Introduction', 'content': '...'}, ...]
     """
-    if kwargs.get("split_method") == "recursive":
-        text_splitter = RecursiveCharacterTextSplitter(
+    if split_method == "character":
+        text_splitter = CharacterTextSplitter(
             chunk_size=chunk_size, chunk_overlap=chunk_overlap
         )
         # -> list[dict] [{'content': '...'}, ...]
 
-    elif kwargs.get("split_method") == "hierarchical":
+    elif split_method == "recursive":
+        text_splitter = RecursiveTextSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            speparators=kwargs.get("separators", None),
+        )
+        # -> list[dict] [{'content': '...'}, ...]
+
+    elif split_method == "hierarchical":
         headers_to_split_on = [
             ("#", "Header 1"),
             ("##", "Header 2"),
@@ -53,13 +67,16 @@ def _chunking(
         )
         # -> list[dict] [{'Header 1': 'Introduction', 'content': '...'}, ...]
 
+    else:
+        raise ValueError(f"Unknown split_method: {split_method}")
+
     text_list = text_splitter.split_text(text)
 
     return text_list
 
 
-def _add_metadata(
-    chunks: list[dict], document_title: str | None = None, record_id: str | None = None
+def _build_documents(
+    chunks: list[dict], metadata: dict | None = None
 ) -> list[Document]:
     """
     添加id元数据
@@ -72,13 +89,27 @@ def _add_metadata(
                 or chunk.get("Header 2")
                 or chunk.get("Header 1")
                 or "No Header",
-                "document_title": document_title if document_title else "unknown_title",
-                "record_id": str(record_id) if record_id else "unknown_record",
+                # "document_title": document_title if document_title else "unknown_title",
+                # "collection_id": str(record_id) if record_id else "unknown_record",
                 "num_chunks": len(chunks),
-            },
+            }
+            | (metadata or {}),
             id=f"{i}",
         )
         for i, chunk in enumerate(chunks)
     ]
 
     return documents
+
+
+def get_chunks_from_messages(
+    messages: list[dict[str, str]],
+    max_chunk_size: int = 500,
+    metadata: dict | None = None,
+) -> list[Document]:
+
+    text_splitter = MessagesTextSplitter(max_chunk_size=max_chunk_size)
+    chunks = text_splitter.split_text(messages)
+    chunks = _build_documents(chunks, metadata=metadata)
+
+    return chunks

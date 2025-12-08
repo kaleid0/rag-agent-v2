@@ -5,6 +5,7 @@ from beanie.odm.operators.update.array import Pop, Push
 from beanie.odm.operators.update.general import Set
 from beanie.operators import In
 
+from src.database import get_collection
 from .odm.KnowledgeBase import KnowledgeBase
 from .odm.CollectionRecord import CollectionRecord
 from src.rag.ingest.ingest import ingest_file
@@ -132,6 +133,15 @@ async def delete_knowledge_base(knowledge_base_id: str):
     knowledge_base = await KnowledgeBase.get(knowledge_base_id)
     if not knowledge_base:
         raise ValueError("Knowledge base not found")
+
+    if knowledge_base.retriever_type in ["vector", "hybrid"]:
+        # 删除相关 向量库
+        collection_records = await CollectionRecord.find(
+            CollectionRecord.knowledge_base_id == knowledge_base_id
+        ).to_list()
+        for collection_record in collection_records:
+            collection = get_collection(name=str(collection_record.id))
+            collection.delete()
 
     await CollectionRecord.find(
         CollectionRecord.knowledge_base_id == knowledge_base_id

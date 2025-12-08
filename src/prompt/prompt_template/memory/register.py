@@ -5,7 +5,7 @@ from src.prompt.get_prompt import get_prompt
 
 register_prompt(
     PromptConfig(
-        name="short_memory_summary",
+        name="short_term_memory_summary",
         input_builder=lambda args: get_prompt(
             "short_term_memory_summary", "memory"
         ).format(messages=str(args["messages"])),
@@ -16,7 +16,7 @@ register_prompt(
 
 register_prompt(
     PromptConfig(
-        name="long_memory_summary",
+        name="long_term_memory_summary",
         input_builder=lambda args: get_prompt(
             "long_term_memory_summary", "memory"
         ).format(messages=str(args["messages"])),

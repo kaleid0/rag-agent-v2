@@ -11,3 +11,7 @@ class RetrievePipelineProtocol(Protocol):
     async def retrieve_knowledge_base(self, query: str, knowledge_base_id: str) -> str:
         """Retrieve knowledge base based on the query."""
         ...
+
+    async def retrieve_memory(self, query: str, user_id: str) -> str:
+        """Retrieve memory based on the query."""
+        ...

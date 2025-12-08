@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from src.dialog import Session
+from src.session import Session, LongTermMemory
 from src.document import DocumentRecord
 import src.document.odm.DocumentRecord as dr
 from src.rag import KnowledgeBase, CollectionRecord
@@ -29,7 +29,13 @@ async def lifespan(app: FastAPI):
     # 初始化 Beanie ODM
     await init_beanie(
         database=db,  # type: ignore
-        document_models=[Session, KnowledgeBase, DocumentRecord, CollectionRecord],
+        document_models=[
+            Session,
+            KnowledgeBase,
+            DocumentRecord,
+            CollectionRecord,
+            LongTermMemory,
+        ],
     )
 
     print(f"✅ Connected to MongoDB: {database_name}")

@@ -1,9 +1,6 @@
 """聊天相关的 API 路由"""
 
-# import time
-from fastapi import APIRouter, Depends, HTTPException
-
-# from beanie import PydanticObjectId
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 
 from src.api.models import (
     SessionCreateRequest,
@@ -14,9 +11,8 @@ from src.api.models import (
     MessageResponse,
     SuccessResponse,
 )
-from src.dialog import SessionService
+from src.session import SessionService
 
-# from src.api.dependencies import get_dialog_manager
 from fastapi.responses import StreamingResponse
 from src.api.dependencies import get_session_service
 
@@ -31,16 +27,6 @@ async def create_session(
 ):
     """创建新的聊天会话"""
     try:
-        # manager = get_dialog_manager()
-        # session_id = await manager.start_session(
-        #     user_id=request.user_id, metadata=request.metadata
-        # )
-
-        # session = await Session.get(session_id)
-        # if not session:
-        #     raise HTTPException(
-        #         status_code=500, detail="Failed to retrieve created session"
-        #     )
 
         session = await session_service.create_session(
             user_id=request.user_id, metadata=request.metadata
@@ -75,11 +61,14 @@ async def get_session_history(
 
 @router.delete("/sessions/{session_id}", response_model=SuccessResponse)
 async def delete_session(
-    session_id: str, session_service: SessionService = Depends(get_session_service)
+    background_task: BackgroundTasks,
+    session_id: str,
+    session_service: SessionService = Depends(get_session_service),
 ):
     """删除会话"""
     try:
-        await session_service.delete_session(session_id)
+        # await session_service.delete_session(session_id)
+        background_task.add_task(session_service.delete_session, session_id)
         return SuccessResponse(message="Session deleted successfully")
     except HTTPException:
         raise
@@ -91,12 +80,15 @@ async def delete_session(
 
 @router.post("/sessions/{session_id}/exit", response_model=SuccessResponse)
 async def exit_session(
-    session_id: str, session_service: SessionService = Depends(get_session_service)
+    background_task: BackgroundTasks,
+    session_id: str,
+    session_service: SessionService = Depends(get_session_service),
 ):
     """退出会话：如果会话没有任何对话消息，则删除之，否则保留并返回信息。"""
     try:
-        msg = await session_service.exit_session(session_id)
-        return SuccessResponse(message=msg)
+        # msg = await session_service.exit_session(session_id)
+        background_task.add_task(session_service.exit_session, session_id)
+        return SuccessResponse(message="Session exit processing started.")
 
     except HTTPException:
         raise
@@ -132,19 +124,6 @@ async def send_message_stream(
     这是核心的对话接口，支持基于RAG的智能回复
     """
     try:
-        # # 获取会话
-        # session = await Session.get(request.session_id)
-        # if not session:
-        #     raise HTTPException(status_code=404, detail="Session not found")
-
-        # # 获取 DialogManager
-        # dialog_manager = await get_dialog_manager()
-
-        # # 生成助手回复（流式）
-        # kb_id = request.knowledge_base_id if request.knowledge_base_id else None
-        # token_stream = await dialog_manager.generate_response_stream(
-        #     session, request.content, request.metadata, knowledge_base_id=kb_id
-        # )
 
         token_stream = await session_service.send_message_stream(
             session_id=request.session_id,
@@ -172,21 +151,6 @@ async def get_messages(
 ):
     """获取会话的消息列表（支持分页）"""
     try:
-        # session = await Session.get(session_id)
-        # if not session:
-        #     raise HTTPException(status_code=404, detail="Session not found")
-
-        # messages = session.messages[offset : offset + limit]
-        # return [
-        #     MessageResponse(
-        #         role=msg.get("role", "unknown"),
-        #         content=msg.get("content", ""),
-        #         timestamp=msg.get("timestamp"),  # type: ignore
-        #         metadata=msg.get("metadata", {}),  # type: ignore
-        #     )
-        #     for msg in messages
-        # ]
-
         messages = await session_service.get_messages(session_id, offset, limit)
         return [
             MessageResponse(
@@ -211,7 +175,6 @@ async def list_sessions(
     session_service: SessionService = Depends(get_session_service),
 ):
     """列出指定用户的所有会话"""
-    # start = time.time()
     try:
         sessions = await session_service.list_sessions(user_id, offset, limit)
 

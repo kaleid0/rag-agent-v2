@@ -30,7 +30,7 @@ class BM25Retriever:
     def __init__(
         self,
         collection_record_ids: list[str],
-        language: dict[str, str],
+        language: dict[str, str] | None = None,
     ):
         if getattr(self, "_initialized", False):
             return
