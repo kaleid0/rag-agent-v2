@@ -3,6 +3,20 @@ name = "RAG-Agent-v2"
 version = "0.1.0"
 description = "RAG - Agent"
 authors = [{ name = "Kyleidoscopist", email = "1053503073@qq.com" }]
+requires-python = ">=3.11"
+dependencies = [
+    "uvicorn>=0.38.0",
+    "fastapi>=0.124.0",
+    "beanie>=2.0.1",
+    "motor>=3.7.1",
+    "chromadb>=1.3.5",
+    "openai>=2.9.0",
+    "langchain-core>=1.1.1",
+    "langchain-community>=0.4.1",
+    "docling>=2.64.0",
+    "python-multipart>=0.0.20",
+    "streamlit>=1.52.1",
+]
 
 [build-system]
 requires = ["setuptools>=42", "wheel"]

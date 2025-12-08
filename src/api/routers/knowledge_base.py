@@ -1,11 +1,9 @@
 """知识库相关的 API 路由"""
 
-import asyncio
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, HTTPException
 
 from typing import List
 
-# from src.rag import ingest_file
 from src.api.models import (
     KnowledgeBaseCreateRequest,
     KnowledgeBaseResponse,
@@ -14,7 +12,6 @@ from src.api.models import (
     SuccessResponse,
 )
 from src.rag import (
-    ingest_file,
     CollectionRecord,
     KnowledgeBase,
     knowledge_base_service as kb_service,

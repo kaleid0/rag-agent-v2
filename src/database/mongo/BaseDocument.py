@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
-from beanie import Document, Insert, Replace, before_event, Delete, Save, Update
+from beanie import Document, Insert, Replace, before_event, Update
 from pydantic import Field
+
 
 class BaseDocument(Document):
     # 时间戳 Mixin

@@ -1,7 +1,6 @@
 import asyncio
 import os
 
-from beanie.odm.operators.update.array import Pop, Push
 from beanie.odm.operators.update.general import Set
 from beanie.operators import In
 
@@ -9,7 +8,7 @@ from src.database import get_collection
 from .odm.KnowledgeBase import KnowledgeBase
 from .odm.CollectionRecord import CollectionRecord
 from src.rag.ingest.ingest import ingest_file
-from src.document import DocumentRecord, id_to_title
+from src.document import DocumentRecord
 
 from config import rag_cfg
 

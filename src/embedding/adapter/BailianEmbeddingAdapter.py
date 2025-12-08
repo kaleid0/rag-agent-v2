@@ -1,7 +1,5 @@
 from .BaseEmbeddingAdapter import BaseEmbeddingAdapter
-from abc import ABC, abstractmethod
-from typing import Optional, Iterator, AsyncGenerator
-import asyncio
+
 import json
 import os
 from typing import Literal
@@ -18,7 +16,7 @@ class BailianEmbeddingAdapter(BaseEmbeddingAdapter):
     def name(self) -> dict:
         return {"llm_provider": "bailian", "model": self.model}
 
-    def __init__(self, api_key: Optional[str] = None, model: str = "text-embedding-v4"):
+    def __init__(self, api_key: str | None = None, model: str = "text-embedding-v4"):
         self.api_key = api_key or os.getenv("BAILIAN_API_KEY")
         if not self.api_key:
             raise ValueError(

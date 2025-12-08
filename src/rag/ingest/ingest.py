@@ -1,8 +1,6 @@
 import os
 import pickle
-from beanie.odm.operators.update.general import Set
 
-from src.document.odm.DocumentRecord import DocumentRecord
 from src.rag.retriever import ChromaRetriever, BM25Retriever
 from .text_splitter.get_chunks import get_chunks, get_chunks_from_messages
 

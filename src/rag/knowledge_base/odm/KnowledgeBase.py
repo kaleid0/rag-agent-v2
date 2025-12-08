@@ -1,9 +1,7 @@
 from pydantic import Field
 from pymongo import DESCENDING
 
-# from beanie import PydanticObjectId
-
-from src.database.mongo.BaseDocument import BaseDocument
+from src.database import BaseDocument
 
 
 # 数据库设计

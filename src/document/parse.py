@@ -4,7 +4,6 @@ from io import BytesIO
 import logging
 from pathlib import Path
 import re
-import json
 
 from docling.datamodel.accelerator_options import AcceleratorDevice, AcceleratorOptions
 from docling.document_converter import DocumentConverter, PdfFormatOption

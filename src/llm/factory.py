@@ -1,8 +1,7 @@
 from typing import Dict
-from ..llm.adapter.DeepseekChatAdapter import DeepseekChatAdapter
+from .adapter.DeepseekChatAdapter import DeepseekChatAdapter
 from .adapter.BaseChatAdapter import BaseChatAdapter
 
-# from llm.adapters.openai_adapter import OpenAIChatAdapter
 
 _instances: Dict[str, BaseChatAdapter] = {}
 

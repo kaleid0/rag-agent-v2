@@ -5,7 +5,6 @@
 """
 
 import json
-import time
 import streamlit as st
 import requests
 from typing import Optional

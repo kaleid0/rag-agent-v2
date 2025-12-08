@@ -1,7 +1,6 @@
-from beanie import PydanticObjectId
 from pydantic import Field
 from pymongo import ASCENDING
-from src.database.mongo.BaseDocument import BaseDocument
+from src.database import BaseDocument
 
 
 class LongTermMemory(BaseDocument):

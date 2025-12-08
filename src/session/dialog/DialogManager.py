@@ -7,6 +7,7 @@ from beanie.odm.operators.update.general import Set
 
 from src.llm import BaseChatAdapter
 from src.rag import RetrievePipelineProtocol
+
 from .DialogMessage import DialogMessage, RoleEnum
 from src.session.odm.Session import Session
 

@@ -3,13 +3,10 @@ import os
 import uuid
 from fastapi import File, HTTPException, UploadFile
 from pathlib import Path
-from beanie.odm.operators.update.general import Set
-from beanie.odm.operators.update.array import Pop
 
 from src.rag import CollectionRecord
 
 from .odm.DocumentRecord import DocumentRecord
-from src.rag import KnowledgeBase
 from .parse import parse
 from config import rag_cfg
 

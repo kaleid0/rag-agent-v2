@@ -1,13 +1,9 @@
-import asyncio
 from typing import Optional
 from pydantic import Field
-from enum import Enum
 from pymongo import DESCENDING, ASCENDING
 from beanie import Insert, Delete, Save, SaveChanges, Update, before_event, after_event
-from bidict import bidict
-from beanie.odm.operators.update.general import Set
 
-from src.database.mongo.BaseDocument import BaseDocument
+from src.database import BaseDocument
 
 
 # class StatusEnum(int, Enum):

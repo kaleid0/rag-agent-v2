@@ -1,5 +1,5 @@
 import os
-from typing import Any, AsyncIterator, Iterator, AsyncGenerator, Optional
+from typing import Iterator, AsyncGenerator
 from openai import OpenAI, AsyncOpenAI
 from .BaseChatAdapter import BaseChatAdapter, Messages
 
@@ -20,12 +20,12 @@ class DeepseekChatAdapter(BaseChatAdapter):
     """DeepSeek API 适配器，实现 sync 与 stream 调用"""
 
     supports_streaming = True
-    supports_async = False  # 如果要加 async 可扩展
-    supports_format_output = False
+    supports_async = True  # 如果要加 async 可扩展
+    supports_format_output = True
     supports_prefix_assistant_message = True
     supports_stop_sequences = True
 
-    def __init__(self, api_key: Optional[str] = None, model: str = "deepseek-chat"):
+    def __init__(self, api_key: str | None = None, model: str = "deepseek-chat"):
         self.api_key = api_key or os.getenv("DEEPSEEK_API_KEY")
         if not self.api_key:
             raise ValueError(
@@ -46,7 +46,7 @@ class DeepseekChatAdapter(BaseChatAdapter):
     def chat(
         self,
         messages: Messages,
-        format: Optional[str] = None,
+        format: str | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.5,
         **kwargs,
@@ -71,7 +71,7 @@ class DeepseekChatAdapter(BaseChatAdapter):
     async def async_chat(
         self,
         messages: Messages,
-        format: Optional[str] = None,
+        format: str | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.5,
         **kwargs,
@@ -95,7 +95,7 @@ class DeepseekChatAdapter(BaseChatAdapter):
     def stream_chat(
         self,
         messages: Messages,
-        format: Optional[str] = None,
+        format: str | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.5,
         **kwargs,
@@ -116,7 +116,7 @@ class DeepseekChatAdapter(BaseChatAdapter):
     async def async_stream_chat(
         self,
         messages: Messages,
-        format: Optional[str] = None,
+        format: str | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.5,
         **kwargs,
@@ -156,7 +156,7 @@ class DeepseekChatAdapter(BaseChatAdapter):
     def call(
         self,
         prompt: str,
-        format: Optional[str] = None,
+        format: str | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.5,
     ) -> str | None:
@@ -175,7 +175,7 @@ class DeepseekChatAdapter(BaseChatAdapter):
     async def async_call(
         self,
         prompt: str,
-        format: Optional[str] = None,
+        format: str | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.5,
     ) -> str | None:

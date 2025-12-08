@@ -37,10 +37,9 @@ class SessionService:
         session = await Session.get(session_id)
         if session is None:
             raise HTTPException(status_code=404, detail="Session not found")
-        # TODO: 删除相关的RAG记忆
+
         await self.memory_manager.delete_memory_from_rag(session_id, session)
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
+
         await session.delete()
 
     async def exit_session(self, session_id: str) -> str:

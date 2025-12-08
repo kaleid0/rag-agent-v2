@@ -2,8 +2,6 @@ from typing import Dict
 from .adapter.BailianEmbeddingAdapter import BailianEmbeddingAdapter
 from .adapter.BaseEmbeddingAdapter import BaseEmbeddingAdapter
 
-# from llm.adapters.openai_adapter import OpenAIChatAdapter
-
 _instances: Dict[str, BaseEmbeddingAdapter] = {}
 
 

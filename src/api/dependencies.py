@@ -3,10 +3,9 @@
 from typing import Optional
 
 from src.session import SessionService, DialogManager, MemoryManager
-from src.rag import RetrievePipelineProtocol, EnhancedPipeline, SimplePipeline
+from src.rag import EnhancedPipeline, SimplePipeline
 from src.llm import get_llm
 
-# from src.rag import retrieve_knowledge_base_pipeline
 from config import rag_cfg, memory_cfg
 
 

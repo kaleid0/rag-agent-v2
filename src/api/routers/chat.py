@@ -1,6 +1,7 @@
 """聊天相关的 API 路由"""
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi.responses import StreamingResponse
 
 from src.api.models import (
     SessionCreateRequest,
@@ -13,7 +14,6 @@ from src.api.models import (
 )
 from src.session import SessionService
 
-from fastapi.responses import StreamingResponse
 from src.api.dependencies import get_session_service
 
 
