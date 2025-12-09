@@ -2,6 +2,27 @@
 
 一个基于 RAG（检索增强生成）技术的智能对话系统，支持文档知识库管理、多种检索策略和长期记忆功能。
 
+<div align="center">
+    <div style="display: flex; justify-content: space-around; width: 100%;">
+
+        <div style="width: 30%;">
+            <img src="docs/images/b3f95e89-a0f5-4211-b176-8d5309b67c05.png" alt="图片描述 1" style="width: 100%;">
+            <p align="center">图例 1</p>
+        </div>
+        
+        <div style="width: 30%;">
+            <img src="docs/images/c1bbf423-d759-4aa7-96fe-64f9f2cc2fca.png" alt="图片描述 2" style="width: 100%;">
+            <p align="center">图例 2</p>
+        </div>
+        
+        <div style="width: 30%;">
+            <img src="docs/images/4c69e271-3e7e-4887-9879-bda46c332a5e.png" alt="图片描述 3" style="width: 100%;">
+            <p align="center">图例 3</p>
+        </div>
+        
+    </div>
+</div>
+
 ## 🌟 主要特性
 
 - **文档知识库管理**：支持多种文档格式上传、解析和管理
@@ -129,6 +150,7 @@ uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
 服务将在 `http://localhost:8000` 启动。
 
 API 文档：
+
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
@@ -279,7 +301,7 @@ class MyCustomEmbeddingAdapter(BaseEmbeddingAdapter):
 ## 👥 作者
 
 **Kyleidoscopist**  
-Email: 1053503073@qq.com
+Email: <1053503073@qq.com>
 
 ## 🤝 贡献
 
@@ -290,7 +312,7 @@ Email: 1053503073@qq.com
 如有问题或建议，请通过以下方式联系：
 
 - 提交 GitHub Issue
-- 发送邮件至：1053503073@qq.com
+- 发送邮件至：<1053503073@qq.com>
 
 ---
 

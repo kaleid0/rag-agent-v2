@@ -17,7 +17,7 @@ build/
 data/
 
 # docs
-docs/
+docs/note.md
 
 # Tests
 tests/
