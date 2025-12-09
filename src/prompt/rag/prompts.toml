@@ -1,0 +1,31 @@
+
+[grade_texts]
+template = "grade_texts"
+category = "rag"
+input_params = { query = "query", text1 = "text1", text2 = "text2", text3 = "text3", text4 = "text4", text5 = "text5" }
+output_parser = "json"
+
+[grade_texts.llm_args]
+temperature = 0
+max_tokens = 200
+
+
+[query_rewrite]
+template = "query_rewrite"
+category = "rag"
+input_params = { question = "question" }
+output_parser = "json"
+[query_rewrite.llm_args]
+temperature = 0
+max_tokens = 200
+
+
+[query_route]
+template = "query_route"
+category = "rag"
+custom_input_builder = "query_route"
+input_params = { titles = "titles", keywords = "keywords", question = "question" }
+output_parser = "json"
+[query_route.llm_args]
+temperature = 0
+max_tokens = 200

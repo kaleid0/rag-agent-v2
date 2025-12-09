@@ -10,7 +10,7 @@ from src.session import Session, LongTermMemory
 from src.document import DocumentRecord
 import src.document.odm.DocumentRecord as dr
 from src.rag import KnowledgeBase, CollectionRecord
-from src.prompt import load_all_prompts
+from src.prompt import auto_register_from_directory, load_all_prompts
 
 from config import mongo_cfg
 from .routers import chat, document, knowledge_base
@@ -42,6 +42,8 @@ async def lifespan(app: FastAPI):
 
     # 加载提示模板
     load_all_prompts()
+    # res = auto_register_from_directory("src/prompt")
+    # print(f"✅ Auto-registered prompts from directory: {res.keys()}")
 
     # 加载id-title映射
     records = await DocumentRecord.find_all().to_list()

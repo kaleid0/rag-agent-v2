@@ -25,11 +25,25 @@ You are a query routing assistant that determines which collections are most rel
 卷积网络和 Transformer 网络的区别是什么？
 
 **Collections**:
-{{
+<!-- {{
    "Resnet": [keywords],
    "ViT": [keywords],
    "Knowledge Distillation": [keywords]
-}}
+}} -->
+[
+   {{
+      "collection": "Resnet",
+      "keywords": [...],
+   }},
+   {{
+      "collection": "ViT",
+      "keywords": [...]
+   }},
+   {{
+      "collection": "Knowledge Distillation",
+      "keywords": [...]
+   }}
+]
 
 **Output**:
 

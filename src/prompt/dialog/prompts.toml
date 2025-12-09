@@ -1,0 +1,32 @@
+
+[plain_chat]
+template = "plain_chat"
+category = "dialog"
+input_params = { user_message = "user_message" }
+output_parser = "plain"
+
+[plain_chat.llm_args]
+temperature = 0.3
+max_tokens = 2048
+
+
+[RAG_answer]
+template = "RAG_answer"
+category = "dialog"
+input_params = { information = "information", question = "question" }
+output_parser = "plain"
+
+[RAG_answer.llm_args]
+temperature = 0.2
+max_tokens = 2048
+
+
+[generate_dialog_title]
+template = "generate_dialog_title"
+category = "dialog"
+input_params = { text = "text" }
+output_parser = "strip_quotes"
+
+[generate_dialog_title.llm_args]
+temperature = 0
+max_tokens = 32

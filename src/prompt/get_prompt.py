@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 
-BASE_DIR = Path("src/prompt/prompt_template")
+BASE_DIR = Path("src/prompt/")
 
 
 def md_to_xml(markdown_text: str) -> str:
@@ -63,7 +63,7 @@ def _preprocess(prompt: str) -> str:
 
 def load_prompt(prompt_name: str, module_name: str) -> str:
     """读取 markdown prompt 文件"""
-    file_path = BASE_DIR / module_name / f"{prompt_name}.md"
+    file_path = BASE_DIR / module_name / "prompt_template" / f"{prompt_name}.md"
 
     if file_path.exists():
         return file_path.read_text(encoding="utf-8")

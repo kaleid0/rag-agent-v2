@@ -1,0 +1,29 @@
+
+[long_term_memory_summary]
+template = "long_term_memory_summary"
+category = "memory"
+input_params = { messages = "messages" }
+output_parser = "json"
+[long_term_memory_summary.llm_args]
+temperature = 0
+max_tokens = 2000
+
+
+[short_term_memory_summary]
+template = "short_term_memory_summary"
+category = "memory"
+input_params = { messages = "messages" }
+output_parser = "plain"
+[short_term_memory_summary.llm_args]
+temperature = 0
+max_tokens = 1000
+
+
+[memory_merge]
+template = "memory_merge"
+category = "memory"
+input_params = { existing_summary = "existing_summary", new_summary = "new_summary" }
+output_parser = "json"
+[memory_merge.llm_args]
+temperature = 0
+max_tokens = 2000

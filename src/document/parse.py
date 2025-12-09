@@ -31,9 +31,7 @@ def docling_to_markdown(
     )
     pipeline_options.do_ocr = kwargs.get("do_ocr", False)
     pipeline_options.do_table_structure = kwargs.get("do_table_structure", True)
-    pipeline_options.table_structure_options.do_cell_matching = kwargs.get(
-        "do_cell_matching", True
-    )
+    pipeline_options.table_structure_options = kwargs.get("do_cell_matching", True)
     pipeline_options.do_formula_enrichment = True
     pipeline_options.accelerator_options = kwargs.get(
         "accelerator_options",

@@ -1,0 +1,19 @@
+
+[extract_abstract]
+template = "extract_abstract"
+category = "document"
+input_params = { text = "text" }
+output_parser = "json"
+[extract_abstract.llm_args]
+temperature = 0
+max_tokens = 300
+
+
+[extract_title]
+template = "extract_title"
+category = "document"
+input_params = { text = "text" }
+output_parser = "json"
+[extract_title.llm_args]
+temperature = 0
+max_tokens = 200
