@@ -6,7 +6,7 @@ from src.session import SessionService, DialogManager, MemoryManager
 from src.rag import EnhancedPipeline, SimplePipeline
 from src.llm import get_llm
 
-from config import rag_cfg, memory_cfg
+from config import rag_cfg, memory_cfg, dialog_cfg
 
 
 # 全局单例
@@ -24,8 +24,8 @@ def get_dialog_manager() -> DialogManager:
 
     if _dialog_manager is None:
         # 从配置创建 LLM 适配器
-        llm_provider = rag_cfg.get("llm_provider", "deepseek")
-        llm_model = rag_cfg.get("llm_model", "deepseek-chat")
+        llm_provider = dialog_cfg.get("llm_provider", "deepseek")
+        llm_model = dialog_cfg.get("llm_model", "deepseek-chat")
 
         # 创建 LLM chat 函数
         llm_adapter = get_llm(llm_provider=llm_provider, model=llm_model)

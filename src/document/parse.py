@@ -31,7 +31,9 @@ def docling_to_markdown(
     )
     pipeline_options.do_ocr = kwargs.get("do_ocr", False)
     pipeline_options.do_table_structure = kwargs.get("do_table_structure", True)
-    pipeline_options.table_structure_options = kwargs.get("do_cell_matching", True)
+    pipeline_options.table_structure_options.do_cell_matching = kwargs.get(  # type: ignore
+        "do_cell_matching", True
+    )
     pipeline_options.do_formula_enrichment = True
     pipeline_options.accelerator_options = kwargs.get(
         "accelerator_options",
@@ -88,7 +90,7 @@ async def parse(file_path: str, output_path: str) -> ParseResult:
         )
 
         markdown_content = await asyncio.to_thread(
-            docling_to_markdown, document_stream, output_path
+            docling_to_markdown, document_stream, output_path, **rag_cfg["docling"]
         )
     except Exception as e:
         logger.error(f"文件转换失败: {file_path}", exc_info=e)

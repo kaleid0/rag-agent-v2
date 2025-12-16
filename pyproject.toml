@@ -34,6 +34,10 @@ persist_directory = "data/chroma_db"
 # port = 8000
 # settings = "{}"  # 如有特殊设置，可填写 JSON 字符串
 
+[tool.dialog]
+llm_provider = "bailian" # deepseek, bailian
+llm_model = "qwen-plus" # qwen-plus, deepseek-chat
+
 
 [tool.rag]
 # 检索器配置
@@ -47,8 +51,8 @@ chunk_dir = "data/chunked_files"
 chunk_size = 300
 chunk_overlap = 50
 split_method = "hierarchical"                # character, recursive, hierarchical
-llm_provider = "deepseek"
-llm_model = "deepseek-chat"
+llm_provider = "bailian" # deepseek, bailian
+llm_model = "qwen-plus" # qwen-plus, deepseek-chat
 embedding_provider = "bailian"
 embedding_model = "text-embedding-ada-002"
 
@@ -59,6 +63,13 @@ query_route = true
 rerank = true
 context_retrieve = true
 # retrievel_method = ["bm25", "chroma"] # bm25, chroma
+
+[tool.rag.docling]
+do_picture_description = false
+do_ocr = false
+do_table_structure = true
+do_cell_matching = true
+# accelerator_options = 
 
 
 [tool.memory]

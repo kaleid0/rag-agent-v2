@@ -117,10 +117,7 @@ async def add_record_to_knowledge_base(knowledge_base_id: str, document_record_i
     collection_record.chunk_path = chunk_save_path
     collection_record.num_chunks = ingest_result.num_chunks
 
-    await collection_record.update(
-        Set({CollectionRecord.chunk_path: chunk_save_path}),
-        Set({CollectionRecord.num_chunks: ingest_result.num_chunks}),
-    )
+    await collection_record.save_changes()
 
 
 async def delete_knowledge_base(knowledge_base_id: str):

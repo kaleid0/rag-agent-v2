@@ -1,6 +1,7 @@
 from typing import Dict
 from .adapter.DeepseekChatAdapter import DeepseekChatAdapter
 from .adapter.BaseChatAdapter import BaseChatAdapter
+from .adapter.BailianChatAdapter import BailianChatAdapter
 
 
 _instances: Dict[str, BaseChatAdapter] = {}
@@ -18,6 +19,10 @@ def get_llm(
             )
         elif llm_provider == "openai":
             raise NotImplementedError("OpenAI adapter not added yet")
+        elif llm_provider == "bailian":
+            _instances[key] = BailianChatAdapter(
+                api_key=api_key, model=model or "deepseek-chat"
+            )
         else:
             raise ValueError(f"Unknown LLM provider name: {llm_provider}")
     return _instances[key]

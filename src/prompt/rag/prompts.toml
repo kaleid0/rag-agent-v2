@@ -8,6 +8,7 @@ output_parser = "json"
 [grade_texts.llm_args]
 temperature = 0
 max_tokens = 200
+format = "json"
 
 
 [query_rewrite]
@@ -18,6 +19,7 @@ output_parser = "json"
 [query_rewrite.llm_args]
 temperature = 0
 max_tokens = 200
+format = "json"
 
 
 [query_route]
@@ -29,3 +31,4 @@ output_parser = "json"
 [query_route.llm_args]
 temperature = 0
 max_tokens = 200
+format = "json"

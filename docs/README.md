@@ -63,6 +63,14 @@ persist_directory = "data/chroma_db"
 # port = 8000
 ```
 
+### 对话模型配置
+
+```toml
+[tool.dialog]
+llm_provider = "deepseek"
+llm_model = "deepseek-chat"
+```
+
 ### RAG 配置
 
 ```toml
@@ -124,12 +132,6 @@ sudo systemctl start mongod
 ### 2. 启动 FastAPI 服务器
 
 ```bash
-python run_server.py
-```
-
-或使用 uvicorn：
-
-```bash
 uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -148,13 +150,16 @@ streamlit run streamlit_demo.py
 
 前端界面将在浏览器自动打开（默认 `http://localhost:8501`）。
 
+## 📑RAG 流程图
+
+![替代文字](images/rag.png)
+
 ## 📁 项目结构
 
-```
+```text
 rag-agent-v2/
 ├── config.py                 # 配置加载
 ├── pyproject.toml            # 项目配置和依赖
-├── run_server.py             # FastAPI 服务启动脚本
 ├── streamlit_demo.py         # Streamlit 前端界面
 ├── data/                     # 数据目录
 │   ├── chroma_db/            # ChromaDB 持久化目录
@@ -188,7 +193,9 @@ rag-agent-v2/
     ├── prompt/               # 提示词管理
     │   ├── get_prompt.py     # 提示词获取
     │   ├── llm_call.py       # LLM 调用封装
-    │   └── prompt_template/  # 提示词模板
+    │   ├── PromptConfig.py   # 提示词注册类
+    │   ├── auto_register.py  # 提示词注册方法
+    │   └── module            # 不同模块的prompt模板，以及注册
     ├── rag/                  # RAG 核心模块
     │   ├── ingest/           # 文档摄取
     │   ├── knowledge_base/   # 知识库管理

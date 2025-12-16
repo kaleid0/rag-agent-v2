@@ -7,6 +7,7 @@ output_parser = "json"
 [long_term_memory_summary.llm_args]
 temperature = 0
 max_tokens = 2000
+format = "json"
 
 
 [short_term_memory_summary]
@@ -27,3 +28,4 @@ output_parser = "json"
 [memory_merge.llm_args]
 temperature = 0
 max_tokens = 2000
+format = "json"

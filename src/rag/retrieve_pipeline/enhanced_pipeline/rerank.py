@@ -27,6 +27,10 @@ async def rerank(
     task = []
     for i in range(0, len(documents), batch):
         batch_texts = documents[i : i + batch]
+        texts = [doc.page_content for doc in batch_texts]
+        # 不足5个补齐到5个
+        while len(texts) < 5:
+            texts.append("")
         task.append(
             llm_call(
                 prompt_name="grade_texts",
@@ -35,11 +39,11 @@ async def rerank(
                 ),
                 args={
                     "query": query,
-                    "text1": batch_texts[0].page_content,
-                    "text2": batch_texts[1].page_content,
-                    "text3": batch_texts[2].page_content,
-                    "text4": batch_texts[3].page_content,
-                    "text5": batch_texts[4].page_content,
+                    "text1": texts[0],
+                    "text2": texts[1],
+                    "text3": texts[2],
+                    "text4": texts[3],
+                    "text5": texts[4],
                 },
             )
         )

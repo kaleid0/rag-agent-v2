@@ -9,3 +9,5 @@ chroma_cfg = cfg["tool"]["chroma"]
 rag_cfg = cfg["tool"]["rag"]
 
 memory_cfg = cfg["tool"]["memory"]
+
+dialog_cfg = cfg["tool"]["dialog"]

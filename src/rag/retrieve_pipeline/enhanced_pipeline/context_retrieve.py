@@ -29,24 +29,24 @@ async def context_retrieve(
     if not documents:
         return {}
 
-    # 1. 按 record_id 聚合 chunk IDs 和总片段数
+    # 1. 按 collection_id 聚合 chunk IDs 和总片段数
     records_ids_chunk_ids = {}
     for doc in documents:
-        record_id = doc.metadata.get("record_id")
+        collection_id = doc.metadata.get("collection_id")
         # 确保 num_chunks 是整数
         num_chunks = int(doc.metadata.get("num_chunks", 0))
 
-        # 忽略没有 record_id 或 num_chunks 小于等于 0 的文档
-        if not record_id or num_chunks <= 0:
+        # 忽略没有 collection_id 或 num_chunks 小于等于 0 的文档
+        if not collection_id or num_chunks <= 0:
             continue
 
-        if record_id not in records_ids_chunk_ids:
-            records_ids_chunk_ids[record_id] = {
+        if collection_id not in records_ids_chunk_ids:
+            records_ids_chunk_ids[collection_id] = {
                 "chunk_ids": [],
                 "num_chunks": num_chunks,
             }
 
-        records_ids_chunk_ids[record_id]["chunk_ids"].append(doc.id)
+        records_ids_chunk_ids[collection_id]["chunk_ids"].append(doc.id)
 
     # 如果聚合后没有有效记录，则返回空列表
     if not records_ids_chunk_ids:
