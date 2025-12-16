@@ -152,7 +152,7 @@ streamlit run streamlit_demo.py
 
 ## 📑RAG 流程图
 
-![替代文字](images/rag.png)
+![替代文字](images/rag-2025-07-02-2205.svg)
 
 ## 📁 项目结构
 
