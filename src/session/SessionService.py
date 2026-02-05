@@ -54,6 +54,7 @@ class SessionService:
             await session.delete()
             return "Session had no messages and was deleted."
         else:
+            # TODO 每次进session会重复ingest
             await asyncio.gather(
                 self.memory_manager.update_long_term_memory(session),
                 self.memory_manager.ingest_memory_to_rag(session),

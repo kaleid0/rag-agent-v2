@@ -126,6 +126,10 @@ class EnhancedPipeline:
                 top_k=10,  # TODO config
             )
         logger.info(f"EnhancedPipeline: retrieved documents:")
+        if result is None or len(result) == 0:
+            logger.info("  None")
+            return "No documents retrieved."
+
         for doc in result or []:
             logger.info(f"  - {doc.metadata['document_title']}")
             logger.info(f"    {doc.page_content[:100]}...")

@@ -12,6 +12,7 @@ class Session(BaseDocument):
 
     message_count: int = Field(default=0)
     last_summary_count: int = Field(default=-1)
+    # last_ingest_count: int = Field(default=-1) # XXX
 
     system_prompt: str = Field(default="")  # 系统消息
     dialog_messages: list[DialogMessage] = Field(default_factory=list)

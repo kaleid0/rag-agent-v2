@@ -287,6 +287,18 @@ class MyCustomEmbeddingAdapter(BaseEmbeddingAdapter):
         pass
 ```
 
+### 添加分块算法
+
+TODO
+
+### 添加 retrieve pipeline
+
+TODO
+
+### 添加 prompt 以及 LLM 调用
+
+TODO
+
 ## 📝 许可证
 
 本项目使用 MIT 许可证。
